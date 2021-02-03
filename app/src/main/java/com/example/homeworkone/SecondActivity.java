@@ -16,9 +16,11 @@ public class SecondActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
 
-        textView_joke = findViewById(R.id.textView_joke);
         Intent intent = getIntent();
-        textView_joke.setText(intent.getStringExtra("joke"));
+
+        // TODO:
+        // Programmatically display input fields for all blanks in scroll view
+        // Insert input into next Activity at correct spot of value in scroll view
 
     }
 }
