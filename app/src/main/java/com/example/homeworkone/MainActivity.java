@@ -47,22 +47,14 @@ public class MainActivity extends AppCompatActivity {
         client.get(api_url, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                // missing some code here to process response
-                // when you get a 200 status code
 
                 Log.d("api response", new String(responseBody));
 
                 try {
                     JSONObject json = new JSONObject(new String(responseBody));
 
-                    JSONArray blanks_array = json.getJSONArray("blanks");
-                    JSONArray text = json.getJSONArray("value");
-
                     Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-
-                    intent.putExtra("title", json.getString("title"));
-                    intent.putExtra("blanks_array", blanks_array.toString());
-                    intent.putExtra("text", text.toString());
+                    intent.putExtra("json_response", json.toString());
 
                     startActivity(intent);
 
