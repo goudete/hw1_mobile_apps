@@ -10,12 +10,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import androidx.annotation.Nullable;
@@ -37,7 +40,6 @@ public class SecondActivity extends AppCompatActivity {
         List<EditText> allEds = new ArrayList<EditText>();
 
 
-
         Intent intent = getIntent();
         String data = intent.getExtras().getString("json_response");
 
@@ -51,22 +53,20 @@ public class SecondActivity extends AppCompatActivity {
             displayTitle(ll_blanks, title);
             displayBlanks(ll_blanks, blanks_array, allEds);
             Button btn = createButton(ll_blanks);
-            onButtonClick(btn, allEds, story);
+            onButtonClick(btn, allEds, story, blanks_array.length());
 
 
         } catch (JSONException e){
             e.printStackTrace();
         }
 
-        //append user input to end of each story array
-        //pass story as intent to third screen and display
     }
 
     public void displayTitle(LinearLayout ll, String title) {
         TextView text_view_title = new TextView(this);
         text_view_title.setText(title);
-
-
+        text_view_title.setTextSize(30);
+        text_view_title.setPadding(0,5,0,10);
         text_view_title.setGravity(Gravity.CENTER);
         ll.addView(text_view_title);
     }
@@ -103,7 +103,7 @@ public class SecondActivity extends AppCompatActivity {
         return btn;
     }
 
-    public void onButtonClick(Button btn, List<EditText> allEds, JSONArray story) {
+    public void onButtonClick(Button btn, List<EditText> allEds, JSONArray story, int blanks_length) {
         //User input strings
         String[] user_strings = new String[allEds.size()];
 
@@ -113,35 +113,55 @@ public class SecondActivity extends AppCompatActivity {
                     user_strings[i] = allEds.get(i).getText().toString();
                     Log.d("MAMMOTH", allEds.get(i).getText().toString());
                 }
-                addToStory(user_strings, story);
+                addToStory(user_strings, story, blanks_length);
             }
         });
     }
 
-    public void addToStory(String[] user_strings, JSONArray story) {
+    public void addToStory(String[] user_strings, JSONArray story, int blanks_length) {
         String final_story = "";
         Intent intent = new Intent(SecondActivity.this, ThirdActivity.class);
+        int inputSize = 0;
 
-        //iterate through story array, append user string to end
-        for (int i = 0; i < story.length()-2; i ++) {
+        //count number of inputs and trim inputs
+        for (int k = 0; k < user_strings.length; k++) {
+            if (!user_strings[k].isEmpty()) {
+                inputSize++;
+                user_strings[k] = user_strings[k].trim();
+            }
+        }
+
+        //Show toast if not all inputs filled
+        if (inputSize != blanks_length) {
+            //display toast
+            CharSequence text = "Please fill in all Inputs";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(this, text, duration);
+            toast.show();
+
+        } else {
+            //iterate through story array, append user string to end
+            for (int i = 0; i < story.length()-2; i ++) {
+                try {
+                    String sentence = (String) story.get(i);
+                    String line = sentence + user_strings[i];
+                    final_story += line;
+
+                } catch (JSONException e){
+                    e.printStackTrace();
+                }
+
+            }
             try {
-                String sentence = (String) story.get(i);
-                String line = sentence + user_strings[i];
-                final_story += line;
-
-            } catch (JSONException e){
+                final_story += (String) story.get(story.length()-2);
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-
-        }
-        try {
-            final_story += (String) story.get(story.length()-2);
-        } catch (JSONException e) {
-            e.printStackTrace();
+            intent.putExtra("final_story", final_story);
+            startActivity(intent);
         }
 
-        intent.putExtra("final_story", final_story);
-        startActivity(intent);
     }
 }
